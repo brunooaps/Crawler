@@ -156,11 +156,3 @@ Endpoint disponibile:
 
 Riceve i dati e delega il processamento a un **ImportProductsJob**,
 migliorando performance e scalabilità.
-
-------------------------------------------------------------------------
-
-## 🍻 Conclusione
-
-Il progetto soddisfa tutti i requisiti obbligatori della prova tecnica e
-introduce miglioramenti in termini di **UX e performance** grazie
-all'uso di **code asincrone e componenti reattivi**.
