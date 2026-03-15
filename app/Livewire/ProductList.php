@@ -11,8 +11,14 @@ class ProductList extends Component
     use WithPagination;
 
     public $search = '';
-    public $sortField = 'title';
+    public $sortField = 'id';
     public $sortDirection = 'asc';
+
+    public function mount()
+    {
+        $this->sortField = 'id';
+        $this->sortDirection = 'asc';
+    }
 
     public function updatingSearch()
     {
@@ -31,10 +37,13 @@ class ProductList extends Component
 
     public function render()
     {
+        $sortField = $this->sortField ?: 'id';
+        $sortDirection = $this->sortDirection ?: 'asc';
+        
         return view('livewire.product-list', [
             'products' => Product::with('images')
                 ->where('title', 'like', '%' . $this->search . '%')
-                ->orderBy($this->sortField, $this->sortDirection)
+                ->orderBy($sortField, $sortDirection)
                 ->paginate(25),
         ]);
     }
