@@ -63,6 +63,24 @@ class ScrapeProducts extends Command
             return;
         }
 
+        $jsonData = [
+            'products' => $data,
+            'exported_at' => now()->toIso8601String(),
+            'total_products' => count($data)
+        ];
+
+        $jsonContent = json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        
+        $fileName = 'products_' . date('Y-m-d_His') . '.json';
+        $filePath = storage_path('app/' . $fileName);
+        
+        if (file_put_contents($filePath, $jsonContent)) {
+            $this->info('JSON file exported successfully: ' . $fileName);
+            $this->info('  Location: ' . $filePath);
+        } else {
+            $this->warn('Failed to save JSON file, but continuing with API import...');
+        }
+
         $response = \Illuminate\Support\Facades\Http::post(config('app.url') . '/api/import', [
             'products' => $data
         ]);
