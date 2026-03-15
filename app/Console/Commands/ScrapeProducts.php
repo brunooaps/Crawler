@@ -14,40 +14,51 @@ class ScrapeProducts extends Command
      *
      * @var string
      */
-    protected $signature = 'app:scrape-products';
+    protected $signature = 'scrape:products';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Scrape products from Oxylabs Sandbox and send to API';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        $client = new Client();
-        $response = $client->request('GET', 'https://sandbox.oxylabs.io/products');
-        $html = $response->getBody()->getContents();
+        $client = new \GuzzleHttp\Client();
 
+        $response = $client->request('GET', 'https://sandbox.oxylabs.io/products', [
+            'headers' => [
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            ]
+        ]);
+
+        $html = $response->getBody()->getContents();
         $crawler = new Crawler($html);
 
-        // Ajuste os seletores conforme o HTML do site
-        $data = $crawler->filter('.product-card')->each(function (Crawler $node) {
+        $data = $crawler->filter('div.product-card')->each(function ($node) {
             return [
-                'title' => $node->filter('h4.title')->text(), // Exemplo de seletor
-                'price' => (float) str_replace(['$', ','], '', $node->filter('.price')->text()),
-                'description' => $node->filter('.description')->count() ? $node->filter('.description')->text() : '',
-                'category' => $node->filter('.category')->count() ? $node->filter('.category')->text() : 'Geral',
-                'image_url' => $node->filter('img')->attr('src'),
+                'title'       => $node->filter('h4.title')->text(),
+                'price'       => $node->filter('.price-wrapper')->text(),
+                'image_url'   => $node->filter('img')->attr('src'),
+                'description' => $node->filter('.description')->count() ? $node->filter('.description')->text() : null,
+                'category'    => 'General',
             ];
         });
 
-        // A prova pede para enviar para a API POST /api/import
-        Http::post(url('/api/import'), ['products' => $data]);
+        if (empty($data)) {
+            $this->error('No products found. Check your CSS selectors.');
+            return;
+        }
 
-        $this->info('Dados enviados para a fila de importação!');
+        $response = \Illuminate\Support\Facades\Http::post(config('app.url') . '/api/import', [
+            'products' => $data
+        ]);
+
+        if ($response->successful()) {
+            $this->info(count($data) . ' products found and sent to the import queue.');
+        } else {
+            $this->error('Failed to send data to the API. Status: ' . $response->status());
+        }
     }
 }
