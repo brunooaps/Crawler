@@ -38,6 +38,8 @@ class ImportProductsJob implements ShouldQueue
 
     private function sanitizePrice($price): float
     {
-        return (float) preg_replace('/[^0-9.]/', '', str_replace(',', '.', $price));
+        $price = str_replace(['€', ' '], '', $price);
+        $price = str_replace(',', '.', $price);
+        return (float) preg_replace('/[^0-9.]/', '', $price);
     }
 }

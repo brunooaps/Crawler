@@ -9,18 +9,8 @@ use Illuminate\Support\Facades\Http;
 
 class ScrapeProducts extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'scrape:products';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Scrape products from Oxylabs Sandbox and send to API';
 
     public function handle()
@@ -37,12 +27,34 @@ class ScrapeProducts extends Command
         $crawler = new Crawler($html);
 
         $data = $crawler->filter('div.product-card')->each(function ($node) {
+            $categories = $node->filter('.category span')->each(function ($span) {
+                return trim($span->text());
+            });
+            $categoryString = implode(', ', $categories);
+
+            $price = $node->filter('.price-wrapper')->count() ? $node->filter('.price-wrapper')->text() : '0';
+
+            $imageUrl = "https://via.placeholder.com/150";
+            $noscript = $node->filter('noscript');
+
+            if ($noscript->count() > 0) {
+                if (preg_match('/src="([^"]+)"/', $noscript->html(), $matches)) {
+                    $path = $matches[1];
+
+                    if (str_starts_with($path, '/')) {
+                        $imageUrl = 'https://sandbox.oxylabs.io' . $path;
+                    } else {
+                        $imageUrl = $path;
+                    }
+                }
+            }
+
             return [
                 'title'       => $node->filter('h4.title')->text(),
-                'price'       => $node->filter('.price-wrapper')->text(),
-                'image_url'   => $node->filter('img')->attr('src'),
+                'price'       => $price,
+                'image_url'   => $imageUrl,
                 'description' => $node->filter('.description')->count() ? $node->filter('.description')->text() : null,
-                'category'    => 'General',
+                'category'    => $categoryString ?: 'General',
             ];
         });
 
