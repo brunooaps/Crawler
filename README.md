@@ -1,59 +1,166 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🎮 Games Crawler & Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Questo progetto è una soluzione full-stack sviluppata per la sfida
+tecnica di Oxylabs. Il sistema implementa un ecosistema completo per lo
+scraping di dati di prodotti (videogiochi), la loro elaborazione
+asincrona tramite code e un'interfaccia moderna per la visualizzazione e
+la gestione dei record.
 
-## About Laravel
+------------------------------------------------------------------------
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Stack Tecnologico
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   **Backend Framework:** Laravel 11 (PHP 8.2+)
+-   **Infrastruttura:** Laravel Sail (Docker)
+-   **Scraping:** Guzzle & Symfony DomCrawler
+-   **Data Processing:** Laravel Queues (Database Driver)
+-   **Admin Panel:** Filament PHP v3
+-   **Frontend UI:** Livewire 3 & TailwindCSS
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+------------------------------------------------------------------------
 
-## Learning Laravel
+## 🛠️ Installazione e Configurazione
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Seguire i passaggi seguenti per avviare il progetto localmente
+utilizzando Docker.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Clonare la Repository
 
-## Laravel Sponsors
+``` bash
+git clone https://github.com/brunooaps/Crawler.git
+cd Crawler
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. Avviare l'Ambiente (Sail)
 
-### Premium Partners
+``` bash
+./vendor/bin/sail up -d
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 3. Installare le Dipendenze ed Eseguire le Migrazioni
 
-## Contributing
+``` bash
+./vendor/bin/sail composer install
+./vendor/bin/sail artisan migrate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Creare l'Utente Amministratore (Pannello Filament)
 
-## Code of Conduct
+``` bash
+./vendor/bin/sail artisan make:filament-user
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+------------------------------------------------------------------------
 
-## Security Vulnerabilities
+## 🏃 Esecuzione del Flusso di Dati
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Il progetto è progettato per essere resiliente e scalabile, utilizzando
+le **code Laravel** per il processamento dei dati.
 
-## License
+### Avviare il Queue Worker
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+In un terminale dedicato eseguire:
+
+``` bash
+./vendor/bin/sail artisan queue:work
+```
+
+### Eseguire il Crawler
+
+In un nuovo terminale eseguire:
+
+``` bash
+./vendor/bin/sail artisan scrape:products
+```
+
+**Nota:**\
+Questo comando estrae i dati, salva un backup in:
+
+`storage/app/products_timestamp.json`
+
+e invia una richiesta **POST** all'API di importazione.
+
+------------------------------------------------------------------------
+
+## 🖥️ Interfacce Disponibili
+
+### 1️⃣ Catalogo Utente (Frontend)
+
+Disponibile all'indirizzo:
+
+http://localhost/view/products
+
+Funzionalità:
+
+-   Interfaccia moderna sviluppata con **Livewire**
+-   **Ricerca in tempo reale** (Debounce 300ms)
+-   **Ordinamento dinamico** per ID, Titolo e Prezzo
+-   **Badge per le categorie**
+-   **Anteprime delle immagini**
+
+------------------------------------------------------------------------
+
+### 2️⃣ Pannello Amministrativo (Filament)
+
+Disponibile all'indirizzo:
+
+http://localhost/admin
+
+Funzionalità:
+
+-   Gestione completa **CRUD** dei prodotti
+-   Visualizzazione immagini tramite **anteprima circolare**
+-   **Modifica ed eliminazione** dei record
+
+------------------------------------------------------------------------
+
+## 📝 Dettagli Tecnici di Implementazione
+
+### Strategia di Scraping Ibrida
+
+Il crawler utilizza:
+
+-   **Selettori CSS** per elementi dinamici
+-   Estrazione diretta dallo script `__NEXT_DATA__`
+
+Questo approccio garantisce l'integrità dei metadati come **generi e
+descrizioni**.
+
+------------------------------------------------------------------------
+
+### Sanitizzazione dei Dati
+
+Implementata la pulizia dei dati tramite:
+
+-   Conversione dei prezzi dal **formato europeo a Float**
+-   Conversione dei **percorsi relativi delle immagini in URL assoluti**
+
+------------------------------------------------------------------------
+
+### Struttura del Database
+
+Relazione **1:N** tra:
+
+-   `products`
+-   `images`
+
+Questo permette il supporto a **più immagini per ogni prodotto**.
+
+------------------------------------------------------------------------
+
+### Gestione API
+
+Endpoint disponibile:
+
+`POST /api/import`
+
+Riceve i dati e delega il processamento a un **ImportProductsJob**,
+migliorando performance e scalabilità.
+
+------------------------------------------------------------------------
+
+## 🍻 Conclusione
+
+Il progetto soddisfa tutti i requisiti obbligatori della prova tecnica e
+introduce miglioramenti in termini di **UX e performance** grazie
+all'uso di **code asincrone e componenti reattivi**.
